@@ -19,14 +19,17 @@ func InitRoutes(dbs *gorm.DB, r *gin.Engine) {
 	// repo
 	userRepo := repository.NewUserRepository(dbs)
 	roomRepo := repository.NewRoomRepository(dbs)
+	bookRepo := repository.NewBookRepository(dbs)
 
 	// service
 	authService := services.NewUserService(userRepo)
 	roomService := services.NewRoomService(roomRepo)
+	bookService := services.NewBookingService(bookRepo)
 
 	// handler
 	authHandler := handlers.NewAuthHandler(authService)
 	roomHandler := handlers.NewRoomHandler(roomService)
+	bookHandler := handlers.NewBookingHandler(bookService)
 
 	// auth
 	routeGroup := r.Group("/api/v1")
@@ -34,4 +37,6 @@ func InitRoutes(dbs *gorm.DB, r *gin.Engine) {
 
 	routeGroup.POST("/rooms", middlewares.AuthRequired(), roomHandler.Create)
 	routeGroup.GET("/rooms/available", middlewares.AuthRequired(), roomHandler.GetAvailable)
+	routeGroup.POST("/bookings", middlewares.AuthRequired(), bookHandler.Create)
+	routeGroup.PATCH("/bookings/:id/cancel", middlewares.AuthRequired(), bookHandler.Cancel)
 }
