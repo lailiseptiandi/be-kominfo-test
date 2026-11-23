@@ -21,7 +21,7 @@ type Config struct {
 }
 
 func LoadConfig() (*Config, error) {
-	err := godotenv.Load()
+	err := godotenv.Load(".env")
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
@@ -31,7 +31,7 @@ func LoadConfig() (*Config, error) {
 		PORT:        getEnv("PORT", "9000"),
 		DB_HOST:     getEnv("DB_HOST", "localhost"),
 		DB_PORT:     getEnv("DB_PORT", ""),
-		DB_USER:     getEnv("DB_USER", "macbookpro"),
+		DB_USER:     getEnv("DB_USERNAME", "macbookpro"),
 		DB_NAME:     getEnv("DB_NAME", ""),
 		DB_PASSWORD: getEnv("DB_PASSWORD", "ServBay.dev"),
 		TimeZone:    getEnv("DB_TIMEZONE", "Asia/Jakarta"),

@@ -35,6 +35,9 @@ func InitDB(cfg config.Config) (*gorm.DB, error) {
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
 		Logger: newLogger,
 	})
+	if err != nil {
+		return nil, err
+	}
 
 	return db, nil
 
