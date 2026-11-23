@@ -25,16 +25,11 @@ func NewRoomRepository(db *gorm.DB) *roomRepository {
 }
 
 func (r *roomRepository) Create(ctx context.Context, room models.Room) (*models.Room, error) {
-	err := r.db.WithContext(ctx).FirstOrCreate(&room).Error
+	err := r.db.WithContext(ctx).Create(&room).Error
 	if err != nil {
 		return nil, err
 	}
-
-	roomDetail, err := r.FindByID(ctx, int(room.ID))
-	if err != nil {
-		return nil, err
-	}
-	return roomDetail, nil
+	return &room, nil
 }
 
 func (r *roomRepository) FindByID(ctx context.Context, id int) (*models.Room, error) {
