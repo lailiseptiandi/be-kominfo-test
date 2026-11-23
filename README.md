@@ -8,6 +8,22 @@ docker compose up --build
 
 API berjalan di `http://localhost:9000`, PostgreSQL di port `5433`.
 
+## Booking integration test
+
+Jalankan PostgreSQL dan pastikan database memiliki skema dari `pkg/database/migration/init.sql` serta minimal satu user. `docker compose up` membuat skema tersebut pada inisialisasi database:
+
+```sh
+docker compose up -d postgres
+```
+
+Jalankan integration test dari root project:
+
+```sh
+DB_HOST=localhost DB_PORT=5433 DB_NAME=db_kominfo_test DB_USERNAME=app DB_PASSWORD=app JWT_SECRET=local-dev-secret go test ./internal/handlers -run '^TestCreateBookingRejectsConflictingConcurrentRequests$' -v
+```
+
+Test mengirim dua request booking secara bersamaan untuk room dan jadwal yang sama, lalu memastikan tepat satu booking tersimpan di database. Test akan dilewati jika `DB_HOST` tidak diatur.
+
 ## Endpoint
 
 ```sh
