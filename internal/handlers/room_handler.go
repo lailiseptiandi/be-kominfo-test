@@ -15,7 +15,7 @@ func NewRoomHandler(room services.RoomService) *RoomHandler {
 	return &RoomHandler{roomService: room}
 }
 
-func (h *RoomHandler) Crate(ctx *gin.Context) {
+func (h *RoomHandler) Create(ctx *gin.Context) {
 	var req requests.RoomRequest
 
 	err := ctx.ShouldBindJSON(&req)

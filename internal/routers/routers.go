@@ -32,6 +32,6 @@ func InitRoutes(dbs *gorm.DB, r *gin.Engine) {
 	routeGroup := r.Group("/api/v1")
 	routeGroup.POST("/login", authHandler.Login)
 
-	routeGroup.POST("/rooms", middlewares.AuthRequired(), roomHandler.Crate)
-	// routeGroup.POST("/rooms/available", middlewares.AuthRequired(), roomHandler.Crate)
+	routeGroup.POST("/rooms", middlewares.AuthRequired(), roomHandler.Create)
+	// routeGroup.GET("/rooms/available", middlewares.AuthRequired(), roomHandler.GetAvailable)
 }
