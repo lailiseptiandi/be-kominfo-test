@@ -6,6 +6,7 @@ COPY . .
 RUN go build -o server ./cmd
 
 FROM alpine:3.21
+RUN apk add --no-cache tzdata
 WORKDIR /app
 COPY --from=build /app/server ./server
 COPY .env.example ./.env
