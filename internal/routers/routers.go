@@ -33,5 +33,5 @@ func InitRoutes(dbs *gorm.DB, r *gin.Engine) {
 	routeGroup.POST("/login", authHandler.Login)
 
 	routeGroup.POST("/rooms", middlewares.AuthRequired(), roomHandler.Create)
-	// routeGroup.GET("/rooms/available", middlewares.AuthRequired(), roomHandler.GetAvailable)
+	routeGroup.GET("/rooms/available", middlewares.AuthRequired(), roomHandler.GetAvailable)
 }

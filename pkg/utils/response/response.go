@@ -7,23 +7,20 @@ import (
 )
 
 type APIResponse struct {
-	Success   bool   `json:"success"`
-	Message   string `json:"message"`
+	Message   string `json:"message,omitempty"`
 	Data      any    `json:"data,omitempty"`
 	ErrorCode string `json:"error_code,omitempty"`
 }
 
 func Success(c *gin.Context, data any) {
 	c.JSON(http.StatusOK, APIResponse{
-		Success: true,
-		Data:    data,
+		Data: data,
 	})
 }
 
 func SuccessWithMessage(c *gin.Context, data any) {
 	c.JSON(http.StatusOK, APIResponse{
-		Success: true,
-		Data:    data,
+		Data: data,
 	})
 }
 
@@ -34,14 +31,12 @@ func Created(c *gin.Context, data any) {
 func Error(c *gin.Context, httpStatus int, message string, errorCode string) {
 	c.AbortWithStatusJSON(httpStatus, APIResponse{
 		ErrorCode: errorCode,
-		Success:   false,
 		Message:   message,
 	})
 }
 
 func ValidationError(c *gin.Context, errors string) {
 	c.AbortWithStatusJSON(http.StatusUnprocessableEntity, APIResponse{
-		Success:   false,
 		Message:   "Validation failed",
 		ErrorCode: errors,
 	})

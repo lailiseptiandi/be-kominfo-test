@@ -10,6 +10,7 @@ import (
 
 type RoomService interface {
 	Create(ctx context.Context, req requests.RoomRequest) (*models.Room, error)
+	GetAvailable(ctx context.Context, req requests.RoomRequestParam) ([]*models.Room, error)
 }
 
 type roomService struct {
@@ -33,4 +34,12 @@ func (r *roomService) Create(ctx context.Context, req requests.RoomRequest) (*mo
 	}
 
 	return room, nil
+}
+
+func (r *roomService) GetAvailable(ctx context.Context, req requests.RoomRequestParam) ([]*models.Room, error) {
+	data, err := r.roomRepo.GetAvailable(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
 }

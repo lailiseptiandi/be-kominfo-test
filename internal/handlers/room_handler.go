@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/lailiseptiandi/be-kominfo-test/internal/dtos/requests"
 	"github.com/lailiseptiandi/be-kominfo-test/internal/services"
@@ -31,5 +33,21 @@ func (h *RoomHandler) Create(ctx *gin.Context) {
 	}
 
 	response.Created(ctx, room)
+
+}
+
+func (h *RoomHandler) GetAvailable(ctx *gin.Context) {
+	req := requests.RoomRequestParam{
+		Start: ctx.Query("start"),
+		End:   ctx.Query("end"),
+	}
+
+	data, err := h.roomService.GetAvailable(ctx, req)
+	if err != nil {
+		response.Error(ctx, http.StatusBadGateway, err.Error(), "")
+		return
+	}
+
+	response.Success(ctx, data)
 
 }
