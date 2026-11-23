@@ -10,6 +10,8 @@ import (
 	"gorm.io/gorm"
 )
 
+var ErrRoomNameExists = errors.New("nama room sudah digunakan")
+
 type RoomRepository interface {
 	Create(ctx context.Context, data models.Room) (*models.Room, error)
 	FindByID(ctx context.Context, id int) (*models.Room, error)
@@ -25,7 +27,16 @@ func NewRoomRepository(db *gorm.DB) *roomRepository {
 }
 
 func (r *roomRepository) Create(ctx context.Context, room models.Room) (*models.Room, error) {
-	err := r.db.WithContext(ctx).Create(&room).Error
+	db := r.db.WithContext(ctx)
+	var count int64
+	if err := db.Model(&models.Room{}).Where("name = ?", room.Name).Count(&count).Error; err != nil {
+		return nil, err
+	}
+	if count > 0 {
+		return nil, ErrRoomNameExists
+	}
+
+	err := db.Create(&room).Error
 	if err != nil {
 		return nil, err
 	}
