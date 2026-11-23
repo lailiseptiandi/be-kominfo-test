@@ -23,7 +23,7 @@ import (
 func TestCreateBookingRejectsConflictingConcurrentRequests(t *testing.T) {
 	dbHost := os.Getenv("DB_HOST")
 	if dbHost == "" {
-		t.Skip("set DB_HOST and related DB_* variables to run integration test")
+		t.Skip("atur DB_HOST dan variabel DB_* lainnya untuk menjalankan tes integrasi")
 	}
 
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=UTC",
@@ -31,28 +31,28 @@ func TestCreateBookingRejectsConflictingConcurrentRequests(t *testing.T) {
 		env("DB_NAME", "db_kominfo_test"), env("DB_PORT", "5433"))
 	db, err := gorm.Open(gormpostgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		t.Fatalf("connect to test database: %v", err)
+		t.Fatalf("gagal terhubung ke database tes: %v", err)
 	}
 	sqlDB, err := db.DB()
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("gagal mengambil koneksi database: %v", err)
 	}
 	defer sqlDB.Close()
 
 	var user models.User
 	if err := db.First(&user).Error; err != nil {
-		t.Fatalf("load test user: %v", err)
+		t.Fatalf("gagal mengambil pengguna tes: %v", err)
 	}
 
 	room := models.Room{Name: fmt.Sprintf("booking-test-%d", time.Now().UnixNano()), Capacity: 10}
 	if err := db.Create(&room).Error; err != nil {
-		t.Fatalf("create test room: %v", err)
+		t.Fatalf("gagal membuat ruangan tes: %v", err)
 	}
 	t.Cleanup(func() { db.Delete(&room) })
 
 	secret := os.Getenv("JWT_SECRET")
 	if secret == "" {
-		t.Fatal("JWT_SECRET must be set before running integration test")
+		t.Fatal("JWT_SECRET harus diatur sebelum menjalankan tes integrasi")
 	}
 	token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, appjwt.Claims{
 		UserID: uint64(user.ID),
@@ -61,14 +61,14 @@ func TestCreateBookingRejectsConflictingConcurrentRequests(t *testing.T) {
 		},
 	}).SignedString([]byte(secret))
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("gagal membuat token tes: %v", err)
 	}
 
 	gin.SetMode(gin.TestMode)
 	r := gin.New()
 	routers.InitRoutes(db, r)
 	start := time.Now().UTC().Add(24 * time.Hour).Truncate(time.Minute)
-	title := fmt.Sprintf("Integration test %d", time.Now().UnixNano())
+	title := fmt.Sprintf("Tes integrasi %d", time.Now().UnixNano())
 	payload, _ := json.Marshal(map[string]any{
 		"room_id": room.ID, "title": title,
 		"start_time": start.Format(time.RFC3339), "end_time": start.Add(time.Hour).Format(time.RFC3339),
@@ -98,21 +98,21 @@ func TestCreateBookingRejectsConflictingConcurrentRequests(t *testing.T) {
 		} else if status == http.StatusBadRequest {
 			rejected++
 		} else {
-			t.Errorf("unexpected response status: %d", status)
+			t.Errorf("menerima status respons yang tidak sesuai: %d", status)
 		}
 	}
 	if created != 1 || rejected != 1 {
-		t.Fatalf("expected one booking and one conflict, got created=%d rejected=%d", created, rejected)
+		t.Fatalf("seharusnya satu booking berhasil dan satu ditolak, hasil: berhasil=%d ditolak=%d", created, rejected)
 	}
 
 	var savedBookings int64
 	if err := db.Model(&models.Booking{}).
 		Where("room_id = ? AND title = ?", room.ID, title).
 		Count(&savedBookings).Error; err != nil {
-		t.Fatalf("check saved booking: %v", err)
+		t.Fatalf("gagal memeriksa booking yang tersimpan: %v", err)
 	}
 	if savedBookings != 1 {
-		t.Fatalf("expected one booking saved in database, got %d", savedBookings)
+		t.Fatalf("seharusnya ada satu booking tersimpan di database, ditemukan %d", savedBookings)
 	}
 }
 
