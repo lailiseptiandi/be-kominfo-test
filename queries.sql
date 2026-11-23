@@ -1,24 +1,24 @@
 -- Rekap Jam Pemakaian Ruangan
-
-select
-    r.id as room_id,
+SELECT
+    r.id AS room_id,
     r.name,
-    round(
-        coalesce(
-            sum(extract(EPOCH FROM (b.end_time - b.start_time)) / 3600.0),
+    ROUND(
+        COALESCE(
+            SUM(
+                EXTRACT(EPOCH FROM (b.end_time - b.start_time)) / 3600.0
+            ),
             0
         )::numeric,
         2
     ) AS total_hours
-from rooms r
-left join bookings b on b.room_id = r.id
-    and status = 'CONFIRMED'
-    and b.start_time >=date_trunc('month', now()
-    and b.end_time < date_trunc('month', now()
-    and b.start_time < date_trunc('month', now() + interval '1 month')
-
-group by r.id, r.name
-order by total_hours, r.name asc
+FROM rooms r
+LEFT JOIN bookings b
+    ON b.room_id = r.id
+    AND b.status = 'CONFIRMED'
+    AND b.start_time >= date_trunc('month', NOW())
+    AND b.start_time < date_trunc('month', NOW() + INTERVAL '1 month')
+GROUP BY r.id, r.name
+ORDER BY total_hours ASC, r.name ASC;
 
 -- Pencarian Ruangan Tersedia
 select r.id, r.name, r.capacity
