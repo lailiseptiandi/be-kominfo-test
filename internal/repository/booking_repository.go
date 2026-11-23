@@ -23,23 +23,28 @@ func NewBookRepository(db *gorm.DB) *bookRepository {
 }
 
 func (r *bookRepository) Create(ctx context.Context, req models.Booking) (*models.Booking, error) {
-	var room models.Room
-	if err := r.db.WithContext(ctx).First(&room, req.RoomID).Error; err != nil {
-		return nil, err
-	}
+	err := r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		if err := tx.Exec("SELECT pg_advisory_xact_lock(?)", int64(req.RoomID)).Error; err != nil {
+			return err
+		}
 
-	var count int64
-	err := r.db.WithContext(ctx).Model(&models.Booking{}).
-		Where("room_id = ? AND start_time < ? AND end_time > ?", req.RoomID, req.EndTime, req.StartTime).
-		Count(&count).Error
-	if err != nil {
-		return nil, err
-	}
-	if count > 0 {
-		return nil, errors.New("room is already booked for this time")
-	}
+		var room models.Room
+		if err := tx.First(&room, req.RoomID).Error; err != nil {
+			return err
+		}
 
-	err = r.db.WithContext(ctx).Create(&req).Error
+		var count int64
+		if err := tx.Model(&models.Booking{}).
+			Where("room_id = ? AND start_time < ? AND end_time > ?", req.RoomID, req.EndTime, req.StartTime).
+			Count(&count).Error; err != nil {
+			return err
+		}
+		if count > 0 {
+			return errors.New("room is already booked for this time")
+		}
+
+		return tx.Create(&req).Error
+	})
 	if err != nil {
 		return nil, err
 	}
