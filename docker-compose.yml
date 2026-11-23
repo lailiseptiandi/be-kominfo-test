@@ -11,7 +11,26 @@ services:
     volumes:
       - ./pkg/database/migration/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U app -d payments"]
+      test: ["CMD-SHELL", "pg_isready -U app -d db_kominfo_test"]
       interval: 3s
       timeout: 3s
       retries: 10
+  api:
+    build: .
+    ports:
+      - "9000:9000"
+    environment:
+      HOST: 0.0.0.0
+      PORT: 9000
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: db_kominfo_test
+      DB_USERNAME: app
+      DB_PASSWORD: app
+      DB_TIMEZONE: Asia/Jakarta
+      JWT_SECRET: local-dev-secret
+      JWT_EXPIRATION: 3600
+      JWT_EXPIRATION_REFRESH: 86400
+    depends_on:
+      postgres:
+        condition: service_healthy
