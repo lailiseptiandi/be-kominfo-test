@@ -8,14 +8,6 @@ docker compose up --build
 
 API berjalan di `http://localhost:9000`, PostgreSQL di port `5433`.
 
-## Automated test
-
-Test integrasi membuat dua request booking paralel untuk jadwal yang sama. Jalankan setelah PostgreSQL aktif:
-
-```sh
-DB_HOST=localhost DB_PORT=5433 DB_NAME=db_kominfo_test DB_USERNAME=app DB_PASSWORD=app JWT_SECRET=local-dev-secret go test ./...
-```
-
 ## Endpoint
 
 ```sh
